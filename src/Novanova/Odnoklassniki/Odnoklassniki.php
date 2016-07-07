@@ -23,7 +23,11 @@ class Odnoklassniki
     /**
      * @var string
      */
-    private $secret;
+    private $secret_session_key;
+    /**
+     * @var string
+     */
+    private $access_token;
 
     /**
      * @var Client
@@ -35,11 +39,12 @@ class Odnoklassniki
      * @param $public_key
      * @param $secret
      */
-    public function __construct($app_id, $public_key, $secret)
+    public function __construct($app_id, $public_key, $secret_session_key, $access_token)
     {
         $this->app_id = $app_id;
         $this->public_key = $public_key;
-        $this->secret = $secret;
+        $this->secret_session_key = $secret_session_key;
+        $this->access_token = $access_token;
 
         $this->guzzle = new Client();
     }
@@ -60,6 +65,7 @@ class Odnoklassniki
         return $this->public_key;
     }
 
+
     /**
      * @param $method
      * @param $params
@@ -67,17 +73,15 @@ class Odnoklassniki
      * @return mixed
      * @throws OdnoklassnikiException
      */
-    public function api($method, array $params = array(), $access_token = null)
+    public function api($method, array $params = array())
     {
         $params['application_key'] = $this->public_key;
         $params['method'] = $method;
         $params['format'] = 'json';
-        $params['sig'] = $this->sign($params, $access_token);
-        if ($access_token) {
-            $params['access_token'] = $access_token;
-        }
+        $params['sig'] = $this->sign($params);
+        $params['access_token'] = $this->access_token;
 
-        return $this->call('http://api.odnoklassniki.ru/fb.do', $params);
+        return $this->call('https//api.ok.ru/fb.do', $params);
     }
 
     /**
@@ -96,25 +100,6 @@ class Odnoklassniki
     }
 
     /**
-     * @param  string                 $code
-     * @param  string                 $redirect_uri
-     * @return mixed
-     * @throws OdnoklassnikiException
-     */
-    public function getAccessToken($code, $redirect_uri)
-    {
-        $params = array(
-            'client_id' => $this->app_id,
-            'client_secret' => $this->secret,
-            'code' => $code,
-            'redirect_uri' => $redirect_uri,
-            'grant_type' => 'authorization_code',
-        );
-
-        return $this->call('https://api.odnoklassniki.ru/oauth/token.do', $params);
-    }
-
-    /**
      * @param $params
      * @param $access_token
      * @return string
@@ -124,15 +109,13 @@ class Odnoklassniki
         $sign = '';
         ksort($params);
         foreach ($params as $key => $value) {
-            if ('sig' == $key || 'resig' == $key) {
+            if ('sig' == $key || 'resig' == $key || 'access_token' == $key) {
                 continue;
             }
             $sign .= $key . '=' . $value;
         }
 
-        $sign .= $access_token ? md5($access_token . $this->secret) : $this->secret;
-
-        return md5($sign);
+        return md5($sign . $this->secret_session_key);
     }
 
     /**
