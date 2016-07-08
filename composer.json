@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-0": {
-            "Novanova\\Odnoklassniki": "src/Novanova/Odnoklassniki/"
+            "Novanova\\Odnoklassniki\\": "src/Novanova/Odnoklassniki/"
         }
     },
     "minimum-stability": "stable"
