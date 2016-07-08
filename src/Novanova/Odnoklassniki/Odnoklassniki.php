@@ -133,15 +133,15 @@ class Odnoklassniki
                 )
             )->getBody();
         } catch (RequestException $e) {
-            throw new OdnoklassnikiException($e->getMessage());
+            throw new \Exception($e->getMessage());
         }
 
         if (!$response = json_decode($response)) {
-            throw new OdnoklassnikiException('Response parse error');
+            throw new \Exception('Response parse error');
         }
 
         if (!empty($response->error_code) && !empty($response->error_msg)) {
-            throw new OdnoklassnikiException($response->error_msg, $response->error_code);
+            throw new \Exception($response->error_msg, $response->error_code);
         }
 
         return $response;
