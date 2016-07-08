@@ -15,7 +15,7 @@
         "guzzlehttp/guzzle": "5.*"
     },
     "autoload": {
-        "files": ["Odnoklassniki.php"]
+        "files": ["src/Novanova/Odnoklassniki/Odnoklassniki.php"]
     },
     "minimum-stability": "stable"
 }
